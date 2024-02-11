@@ -4,7 +4,7 @@ import type { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
-import indexRouter from './routes/index';
+import chatRouter from './routes/chat';
 import cors from 'cors';
 import { ensureCollectionsOnInit } from './utils/qdrant';
 
@@ -20,7 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '../public')));
-app.use('/api', indexRouter);
+app.use('/api/chat', chatRouter);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   const error: any = new Error('Not Found!');

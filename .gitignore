@@ -1,4 +1,5 @@
 /dist-server
 /node_modules
+/temp
 .env.dev
 .env.prod
