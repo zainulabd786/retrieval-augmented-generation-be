@@ -6,9 +6,13 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import indexRouter from './routes/index';
 import cors from 'cors';
+import { ensureCollectionsOnInit } from './utils/qdrant';
 
 var app = express();
 
+ensureCollectionsOnInit()
+  .then(() => console.log('Collections ensured!'))
+  .catch((e) => console.error('Unable to ensure collections', e));
 
 app.use(logger('combined'));
 app.use(cors());
