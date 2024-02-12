@@ -9,3 +9,10 @@ interface CreatePayloadIndexArgs {
     field: string;
     schema: SchemasType["PayloadFieldSchema"]
 }
+
+interface PromptRequest extends Request {
+    body: {
+        text: string;
+        init: boolean;
+    }
+}

@@ -1,8 +1,11 @@
 import { QdrantClient } from '@qdrant/js-client-rest';
 import { ChatOpenAI } from "@langchain/openai";
-
+import { QdrantVectorStore } from "@langchain/community/vectorstores/qdrant";
+import { ConversationalRetrievalQAChain } from "langchain/chains";
+import { ConversationSummaryMemory } from "langchain/memory";
 // @ts-ignore
 import { HuggingFaceTransformersEmbeddings } from "../utils/hf_transformers";
+import { QdrantCollectionNames } from './enums';
 
 
 export const getQdrantClient = () => new QdrantClient({
@@ -23,3 +26,28 @@ export const getLLMModel = () => new ChatOpenAI({
     modelName: process.env.LLM_MODEL,
     streaming: true,
 });
+
+export const getConversationalRetrievalQAChain = async (): Promise<ConversationalRetrievalQAChain> => {
+    try {
+        const client = getQdrantClient();
+        const model = getLLMModel();
+        const embeddings = getEmbeddingsModel();
+        const vectorStore = await QdrantVectorStore.fromExistingCollection(
+            embeddings,
+            { client, collectionName: QdrantCollectionNames.knowledge_base }
+        );
+        const retriever = vectorStore.asRetriever(10);
+        const memory = new ConversationSummaryMemory({
+            memoryKey: "chat_history",
+            llm: model,
+        });
+        const chain = ConversationalRetrievalQAChain.fromLLM(model, retriever, {
+            memory
+        });
+
+        return chain;
+    } catch (e) {
+        console.error("Unable to initialize ConversationalRetrievalQAChain", e);
+        throw e;
+    }
+}
